@@ -39,7 +39,7 @@ export default function Login() {
       >
         <div className="text-center flex flex-col items-center">
           <img
-            src="https://central-lucenera-dashboard-1c9ba.goskip.app/assets/logotipo-verticalv1branco-0271a-C0G7jEpr.png"
+            src="https://central-lucenera.pages.dev/assets/logotipo-verticalv1branco-0271a-C0G7jEpr.png"
             alt="Luce Nera"
             className="h-20 w-auto object-contain mb-4 drop-shadow-2xl"
           />

@@ -19,7 +19,7 @@ export default function Layout() {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between max-w-[1200px]">
           <Link to="/" className="flex items-center gap-3">
             <img
-              src="https://central-lucenera-dashboard-1c9ba.goskip.app/assets/logotipo-verticalv1branco-0271a-C0G7jEpr.png"
+              src="https://central-lucenera.pages.dev/assets/logotipo-verticalv1branco-0271a-C0G7jEpr.png"
               alt="Luce Nera"
               className="h-9 w-auto object-contain"
             />
@@ -37,7 +37,7 @@ export default function Layout() {
               className="text-muted-foreground hover:text-primary"
             >
               <a
-                href="https://central-lucenera-dashboard-1c9ba.goskip.app/dashboard"
+                href="https://central-lucenera.pages.dev/dashboard"
                 title="Voltar para a Central Lucenera"
               >
                 <Home className="w-4 h-4 mr-1.5" />
