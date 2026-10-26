@@ -13,7 +13,8 @@ import {
 } from '@/components/ui/select'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { useToast } from '@/hooks/use-toast'
-import { criarSolicitacao, listarSistemas, TipoSolicitacao } from '@/services/solicitacoes'
+import { criarSolicitacao, enviarFotos, listarSistemas, TipoSolicitacao } from '@/services/solicitacoes'
+import { SeletorFotos } from '@/components/Fotos'
 
 export default function NovoPedido() {
   const navigate = useNavigate()
@@ -24,6 +25,8 @@ export default function NovoPedido() {
   const [titulo, setTitulo] = useState('')
   const [descricao, setDescricao] = useState('')
   const [saving, setSaving] = useState(false)
+  // SPEC-225: fotos escolhidas antes de salvar; sobem depois que o pedido é criado
+  const [fotos, setFotos] = useState<File[]>([])
 
   useEffect(() => {
     listarSistemas().then(setSistemas).catch(console.error)
@@ -37,16 +40,23 @@ export default function NovoPedido() {
     }
     setSaving(true)
     try {
-      await criarSolicitacao({
+      const criada = await criarSolicitacao({
         titulo: titulo.trim(),
         descricao: descricao.trim(),
         tipo,
         sistema_relacionado_id: sistemaRelacionadoId === 'none' ? null : sistemaRelacionadoId,
       })
+      const r = fotos.length ? await enviarFotos(criada.id, fotos) : { enviadas: 0, erros: [] as string[] }
       toast({
         title: 'Pedido registrado!',
-        description: 'A classificação da IA aparece em alguns segundos no painel.',
+        description: `${r.enviadas ? `${r.enviadas} foto(s) anexada(s). ` : ''}A classificação da IA aparece em alguns segundos no painel.`,
       })
+      if (r.erros.length)
+        toast({
+          title: 'Algumas fotos não subiram',
+          description: `${r.erros.join(' · ')} — abra o pedido e adicione de novo.`,
+          variant: 'destructive',
+        })
       navigate('/')
     } catch (err: any) {
       toast({
@@ -119,6 +129,11 @@ export default function NovoPedido() {
                 placeholder="Descreva o que está acontecendo (bug) ou o que deveria mudar (pedido de alteração)"
                 rows={6}
               />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Fotos (opcional)</Label>
+              <SeletorFotos arquivos={fotos} onChange={setFotos} />
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
