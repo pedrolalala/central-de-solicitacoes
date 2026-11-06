@@ -10,7 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Plus, Bug, Wrench, RefreshCw } from 'lucide-react'
+import { Plus, Bug, Wrench, RefreshCw, Search } from 'lucide-react'
+import { Input } from '@/components/ui/input'
 import { listarSolicitacoes, Solicitacao, StatusSolicitacao } from '@/services/solicitacoes'
 
 const COLUNAS: { status: StatusSolicitacao; titulo: string }[] = [
@@ -42,12 +43,21 @@ function ClassificacaoBadge({ classificacao }: { classificacao: Solicitacao['cla
   )
 }
 
+// sem diferenciar maiúscula nem acento
+const normalizar = (t: string | null | undefined) =>
+  (t ?? '')
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+
 export default function Painel() {
   const navigate = useNavigate()
   const [solicitacoes, setSolicitacoes] = useState<Solicitacao[]>([])
   const [loading, setLoading] = useState(true)
   const [filtroClassificacao, setFiltroClassificacao] = useState('todas')
   const [filtroTipo, setFiltroTipo] = useState('todos')
+  // SPEC-249: busca por texto para ver se o problema já foi pedido antes de abrir outro (evita pedido repetido)
+  const [busca, setBusca] = useState('')
 
   const carregar = () => {
     setLoading(true)
@@ -65,9 +75,17 @@ export default function Painel() {
       if (filtroClassificacao !== 'todas' && s.classificacao_ia !== filtroClassificacao)
         return false
       if (filtroTipo !== 'todos' && s.tipo !== filtroTipo) return false
+      const termo = normalizar(busca.trim())
+      if (
+        termo &&
+        ![s.titulo, s.descricao, s.sistema_relacionado_nome, s.autor_nome, s.spec_numero].some((c) =>
+          normalizar(c).includes(termo),
+        )
+      )
+        return false
       return true
     })
-  }, [solicitacoes, filtroClassificacao, filtroTipo])
+  }, [solicitacoes, filtroClassificacao, filtroTipo, busca])
 
   const porStatus = (status: StatusSolicitacao) => filtradas.filter((s) => s.status === status)
 
@@ -91,7 +109,16 @@ export default function Painel() {
         </div>
       </div>
 
-      <div className="flex gap-3 mb-4">
+      <div className="flex flex-wrap gap-3 mb-4">
+        <div className="relative w-72">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            placeholder="Buscar no título, descrição ou sistema..."
+            className="pl-9"
+          />
+        </div>
         <Select value={filtroClassificacao} onValueChange={setFiltroClassificacao}>
           <SelectTrigger className="w-48">
             <SelectValue />
